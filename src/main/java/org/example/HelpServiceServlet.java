@@ -7,17 +7,17 @@ import org.example.repositories.MotivationRepository;
 import java.io.IOException;
 
 public class HelpServiceServlet extends HttpServlet {
-    MotivationRepository motivationRepository = new MotivationRepository();
+    private MotivationRepository motivationRepository = new MotivationRepository();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(motivationRepository.show());
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String newPhrase = request.getReader().readLine();
         if (newPhrase == null || newPhrase.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
