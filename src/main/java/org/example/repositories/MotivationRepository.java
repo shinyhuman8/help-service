@@ -15,11 +15,15 @@ public class MotivationRepository {
     }
 
     public String show() {
-        Random random = new Random();
         if (PHRASE_REPOSITORY.isEmpty())
             return "Sorry, but i don't have any phrases.\n" +
                     "Please save phrase";
-        int phrase_id = random.nextInt(PHRASE_REPOSITORY.size());
+        Random random = new Random();
+        int phrase_id = random.nextInt(1, PHRASE_COUNT+1);
         return PHRASE_REPOSITORY.get(phrase_id);
+    }
+
+    public static int getPhraseCount() {
+        return PHRASE_COUNT;
     }
 }
