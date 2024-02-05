@@ -7,7 +7,7 @@ import org.example.repositories.MotivationRepository;
 import java.io.IOException;
 
 public class HelpServiceServlet extends HttpServlet {
-    private MotivationRepository motivationRepository = new MotivationRepository();
+    private final MotivationRepository motivationRepository = new MotivationRepository();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
