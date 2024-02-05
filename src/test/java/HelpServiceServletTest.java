@@ -37,12 +37,17 @@ public class HelpServiceServletTest {
     @Test
     void doGetShouldWritePhraseToResponseTest() throws IOException {
         MockitoAnnotations.openMocks(this);
+        MotivationRepository motivationRepository = mock(MotivationRepository.class);
+
+        motivationRepository.save("test_show");
 
         when(response.getWriter()).thenReturn(writer);
+        when(motivationRepository.show()).thenReturn("test_show");
 
         servlet.doGet(request, response);
 
         verify(writer).write(anyString());
+        assertEquals(motivationRepository.show(), "test_show");
     }
 
     @Test
