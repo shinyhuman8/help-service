@@ -15,9 +15,10 @@ import java.io.IOException;
 
 @Controller
 public class PhraseController {
-    private MotivationRepository motivationRepository;
+    private final MotivationRepository motivationRepository;
 
     public PhraseController() {
+        this.motivationRepository = new ApplicationContext().getInstance(MotivationRepository.class);
     }
 
     @GetMapping("/help-service/v1/support/get")
