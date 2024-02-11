@@ -8,6 +8,6 @@
 
 ### API
 
-get /help-service/v1/support
+get /help-service/v1/support/get
 
-post /help-service/v1/support
+post /help-service/v1/support/post

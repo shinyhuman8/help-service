@@ -13,22 +13,18 @@ import org.example.repositories.MotivationRepositoryImpl;
 @Configuration
 public class HelpServiceAppConfig {
 
-    @Bean
     public MotivationRepository motivationRepository() {
         return new MotivationRepositoryImpl();
     }
 
-    @Bean
     public RequestGenerator getRequestStrategy() {
         return new GetRequestGenerator();
     }
 
-    @Bean
     public RequestGenerator postRequestStrategy() {
         return new PostRequestGenerator();
     }
 
-    @Bean
     public DispatcherServlet dispatcherServlet() {
         return new DispatcherServlet();
     }
