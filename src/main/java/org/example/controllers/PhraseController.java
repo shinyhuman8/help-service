@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.DTO.PhraseDTO;
+import org.example.annotations.Autowired;
 import org.example.annotations.Controller;
 import org.example.annotations.GetMapping;
 import org.example.annotations.PostMapping;
-import org.example.context.ApplicationContext;
 import org.example.models.Phrase;
 import org.example.repositories.MotivationRepository;
 
@@ -15,10 +15,11 @@ import java.io.IOException;
 
 @Controller
 public class PhraseController {
-    private final MotivationRepository motivationRepository;
+    @Autowired
+    private MotivationRepository motivationRepository;
 
-    public PhraseController() {
-        this.motivationRepository = new ApplicationContext().getInstance(MotivationRepository.class);
+    public void setMotivationRepository(MotivationRepository motivationRepository) {
+        this.motivationRepository = motivationRepository;
     }
 
     @GetMapping("/help-service/v1/support/get")
@@ -33,6 +34,7 @@ public class PhraseController {
 
         response.getWriter().write(jsonString);
     }
+
     @PostMapping("/help-service/v1/support/post")
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -1,7 +1,6 @@
 package org.example.dispatcher;
 
 import org.example.context.ApplicationContext;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -16,6 +15,7 @@ public interface RequestGenerator {
                         .getDeclaringClass()
                         .getDeclaredConstructor()
                         .newInstance();
+                new ApplicationContext().injectFieldBean(controller);
                 handlerMethod.invoke(controller, httpBody.getRequest(), httpBody.getResponse());
             } catch (Exception e) {
                 e.printStackTrace();

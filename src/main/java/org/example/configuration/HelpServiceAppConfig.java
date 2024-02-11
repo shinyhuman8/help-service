@@ -2,7 +2,7 @@ package org.example.configuration;
 
 import org.example.annotations.Bean;
 import org.example.annotations.Configuration;
-import org.example.controllers.PhraseController;
+
 import org.example.dispatcher.DispatcherServlet;
 import org.example.dispatcher.RequestGenerator;
 import org.example.dispatcher.impl.GetRequestGenerator;

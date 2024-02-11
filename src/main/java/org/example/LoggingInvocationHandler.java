@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.annotations.GetMapping;
 import org.example.annotations.Logged;
 
 import java.lang.reflect.InvocationHandler;

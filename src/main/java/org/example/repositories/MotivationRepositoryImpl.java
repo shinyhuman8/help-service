@@ -1,6 +1,5 @@
 package org.example.repositories;
 
-import org.example.DTO.PhraseDTO;
 import org.example.models.Phrase;
 
 import java.util.*;

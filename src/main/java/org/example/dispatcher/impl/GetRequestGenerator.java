@@ -1,6 +1,7 @@
 package org.example.dispatcher.impl;
 
 import org.example.annotations.GetMapping;
+import org.example.annotations.PostMapping;
 import org.example.context.ApplicationContext;
 import org.example.dispatcher.HttpBody;
 import org.example.dispatcher.RequestGenerator;
@@ -13,8 +14,7 @@ public class GetRequestGenerator implements RequestGenerator {
     public void handle(List<HttpBody> httpBodies, ApplicationContext applicationContext) {
         for (HttpBody httpBody : httpBodies) {
             String path = httpBody.getRequest().getRequestURI();
-            Method handlerMethod = applicationContext.findGetHandler(path);
-
+            Method handlerMethod = applicationContext.findHandler(path, GetMapping.class);
             executeRequest(httpBody, handlerMethod);
         }
     }

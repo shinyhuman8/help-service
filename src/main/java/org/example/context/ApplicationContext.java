@@ -1,13 +1,13 @@
 package org.example.context;
 
 import org.example.LoggingInvocationHandler;
+import org.example.annotations.Autowired;
 import org.example.annotations.Configuration;
 import org.example.annotations.Controller;
-import org.example.annotations.GetMapping;
-import org.example.annotations.PostMapping;
 import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -19,12 +19,13 @@ import java.util.stream.Stream;
 
 public class ApplicationContext {
     private final Reflections reflection;
-    private final Map<Class<?>, Object> INSTANCE_BY_CLASS;
+    private final Map<Class<?>, Object> BEAN_BY_CLASS;
 
     public ApplicationContext(String packageToScan) {
-        this.INSTANCE_BY_CLASS = new HashMap<>();
+        this.BEAN_BY_CLASS = new HashMap<>();
         this.reflection = new Reflections(packageToScan);
         init();
+
     }
 
     public ApplicationContext() {
@@ -33,21 +34,21 @@ public class ApplicationContext {
 
     private void init() {
         reflection.getTypesAnnotatedWith(Configuration.class).stream()
-                .map(this::createInstanceByClass)
+                .map(this::createBeanByClass)
                 .forEach(configInstance -> getMethodsWithoutObjectsMethods(configInstance)
                         .forEach(method -> initBeanByBeanMethod(method, configInstance)));
+
     }
 
-
-    public <T> T getInstance(Class<T> clazz) {
-        return (T) this.INSTANCE_BY_CLASS.get(clazz);
+    public <T> T getBean(Class<T> clazz) {
+        return (T) this.BEAN_BY_CLASS.get(clazz);
     }
 
     private Stream<Method> getMethodsWithoutObjectsMethods(Object instance) {
         return Arrays.stream(instance.getClass().getMethods()).filter(method -> !method.getDeclaringClass().equals(Object.class));
     }
 
-    public <T> T createInstanceByClass(Class<T> clazz) {
+    public <T> T createBeanByClass(Class<T> clazz) {
         try {
             return clazz.getConstructor().newInstance();
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException |
@@ -60,30 +61,27 @@ public class ApplicationContext {
         Class<?> returnType = beanMethod.getReturnType();
         try {
             final var instance = wrapWithLoggingProxy(beanMethod.invoke(configInstance));
-            INSTANCE_BY_CLASS.put(returnType, instance);
+            BEAN_BY_CLASS.put(returnType, instance);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Method findGetHandler(String path) {
-        return findHandler(path, GetMapping.class);
+    public Method findHandler(String path, Class<? extends Annotation> annotationType) {
+        return findHandlerImpl(path, annotationType);
     }
 
-    public Method findPostHandler(String path) {
-        return findHandler(path, PostMapping.class);
-    }
-
-    private Method findHandler(String path, Class<? extends Annotation> annotationType) {
+    public Method findHandlerImpl(String path, Class<? extends Annotation> annotationType) {
         Set<Class<?>> controllers = reflection.getTypesAnnotatedWith(Controller.class);
         for (Class<?> controller : controllers) {
             for (Method method : controller.getMethods()) {
                 if (method.isAnnotationPresent(annotationType)) {
                     String methodPath = null;
-                    if (annotationType.equals(GetMapping.class)) {
-                        methodPath = method.getAnnotation(GetMapping.class).value();
-                    } else if (annotationType.equals(PostMapping.class)) {
-                        methodPath = method.getAnnotation(PostMapping.class).value();
+                    try {
+                        Method valueMethod = annotationType.getMethod("value");
+                        methodPath = (String) valueMethod.invoke(method.getAnnotation(annotationType));
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
                     }
                     if (path.equals(methodPath)) {
                         return method;
@@ -93,7 +91,23 @@ public class ApplicationContext {
         }
         return null;
     }
-    private Object wrapWithLoggingProxy(Object object){
+
+
+    public void injectFieldBean(Object controller) {
+        for (Field field : controller.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Autowired.class)) {
+                field.setAccessible(true);
+                try {
+                    field.set(controller, getBean(field.getType()));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+    }
+
+    private Object wrapWithLoggingProxy(Object object) {
         return Proxy.newProxyInstance(this.getClass().getClassLoader(),
                 object.getClass().getInterfaces(),
                 new LoggingInvocationHandler(object));

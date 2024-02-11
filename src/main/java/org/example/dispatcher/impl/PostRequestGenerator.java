@@ -13,7 +13,7 @@ public class PostRequestGenerator implements RequestGenerator {
     public void handle(List<HttpBody> httpBodies, ApplicationContext applicationContext) {
         for (HttpBody httpBody : httpBodies) {
             String path = httpBody.getRequest().getRequestURI();
-            Method handlerMethod = applicationContext.findPostHandler(path);
+            Method handlerMethod = applicationContext.findHandler(path, PostMapping.class);
 
             executeRequest(httpBody, handlerMethod);
         }

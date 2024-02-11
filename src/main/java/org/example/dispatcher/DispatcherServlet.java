@@ -10,12 +10,12 @@ import org.example.annotations.PostMapping;
 import org.example.context.ApplicationContext;
 import org.example.dispatcher.impl.GetRequestGenerator;
 import org.example.dispatcher.impl.PostRequestGenerator;
-import org.example.repositories.MotivationRepository;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @WebServlet("/*")
 public class DispatcherServlet extends HttpServlet {
 
@@ -28,7 +28,8 @@ public class DispatcherServlet extends HttpServlet {
         this.applicationContext = new ApplicationContext();
     }
 
-    public DispatcherServlet() {}
+    public DispatcherServlet() {
+    }
 
     public void addServletRequests(RequestGenerator generator) {
         this.handlers.put(generator.getType(), generator);
@@ -43,7 +44,6 @@ public class DispatcherServlet extends HttpServlet {
         try {
             String method = request.getMethod();
             Class<?> type = getTypeRequest(method);
-
             HttpBody httpBody = new HttpBody(request, response);
             generateRequest(Collections.singletonList(httpBody), type);
         } catch (Exception e) {
@@ -53,14 +53,15 @@ public class DispatcherServlet extends HttpServlet {
 
     private Class<?> getTypeRequest(String method) {
         Class<?> type = null;
-
-        if (method.equals("POST")) {
-            type = PostMapping.class;
-            addServletRequests(new PostRequestGenerator());
-
-        } else if (method.equals("GET")) {
-            type = GetMapping.class;
-            addServletRequests(new GetRequestGenerator());
+        switch (method) {
+            case "POST" -> {
+                type = PostMapping.class;
+                addServletRequests(new PostRequestGenerator());
+            }
+            case "GET" -> {
+                type = GetMapping.class;
+                addServletRequests(new GetRequestGenerator());
+            }
         }
 
         return type;
