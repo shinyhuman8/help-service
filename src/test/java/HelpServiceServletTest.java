@@ -1,18 +1,21 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.HelpServiceServlet;
-import org.example.repositories.MotivationRepository;
+import org.example.DTO.PhraseDTO;
+import org.example.controllers.PhraseController;
+import org.example.dispatcher.DispatcherServlet;
+import org.example.models.Phrase;
+import org.example.repositories.MotivationRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
+
 import static org.mockito.Mockito.*;
 
 public class HelpServiceServletTest {
@@ -23,66 +26,70 @@ public class HelpServiceServletTest {
     HttpServletResponse response;
 
     @Mock
-    PrintWriter writer;
+    DispatcherServlet dispatcherServlet;
 
-    HelpServiceServlet servlet;
-    MotivationRepository motivationRepository;
+    @Mock
+    PhraseController phraseController;
+
+    @Mock
+    MotivationRepositoryImpl motivationRepositoryImpl;
 
     @BeforeEach
     void initHelpServiceServlet() {
-        servlet = new HelpServiceServlet();
-        motivationRepository = new MotivationRepository();
+        dispatcherServlet = Mockito.mock(DispatcherServlet.class);
+        phraseController = new PhraseController();
+        motivationRepositoryImpl = Mockito.mock(MotivationRepositoryImpl.class);
+        phraseController.setMotivationRepository(motivationRepositoryImpl);
+        request = Mockito.mock(HttpServletRequest.class);
+        response = Mockito.mock(HttpServletResponse.class);
     }
 
     @Test
-    void doGetShouldWritePhraseToResponseTest() throws IOException {
-        MockitoAnnotations.openMocks(this);
-        MotivationRepository motivationRepository = mock(MotivationRepository.class);
-
-        motivationRepository.save("test_show");
-
+    void testDoGetShouldWriteJsonResponse() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
         when(response.getWriter()).thenReturn(writer);
-        when(motivationRepository.show()).thenReturn("test_show");
 
-        servlet.doGet(request, response);
+        Phrase expectedPhrase = new Phrase(UUID.randomUUID(), "test_show");
 
-        verify(writer).write(anyString());
-        assertEquals(motivationRepository.show(), "test_show");
+        when(motivationRepositoryImpl.show()).thenReturn(expectedPhrase);
+
+        phraseController.doGet(request, response);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        PhraseDTO phraseDTO = new PhraseDTO(motivationRepositoryImpl.show().getPhrase());
+        String jsonString = objectMapper.writeValueAsString(phraseDTO);
+
+        String expectedJson = "{\"phrase\":\"test_show\"}";
+        assertEquals(expectedJson, jsonString);
     }
+
+
 
     @Test
     void doPostShouldSavePhraseTest() throws IOException {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        BufferedReader reader = mock(BufferedReader.class);
 
-        when(request.getReader()).thenReturn(reader);
-        when(reader.readLine()).thenReturn("Any phrase");
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader("{\"phrase\": \"Any phrase\"}")));
         when(request.getContentType()).thenReturn("text/plain");
+        StringWriter stringWriter = new StringWriter();
+        when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
-        assertEquals("Sorry, but i don't have any phrases.\nPlease save phrase",
-                motivationRepository.show());
+        phraseController.doPost(request, response);
 
-        servlet.doPost(request, response);
-
-        assertEquals("Any phrase",
-                motivationRepository.show());
-
-        verify(response).setStatus(HttpServletResponse.SC_CREATED);
+        assertEquals("Phrase successfully saved", stringWriter.toString().trim());
     }
 
     @Test
     void doPostShouldHandleEmptyPhraseTest() throws IOException {
-        MockitoAnnotations.openMocks(this);
-        BufferedReader reader = mock(BufferedReader.class);
 
-        when(request.getReader()).thenReturn(reader);
-        when(reader.readLine()).thenReturn("");
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader("{\"phrase\": \"\"}")));
         when(request.getContentType()).thenReturn("text/plain");
-        when(response.getWriter()).thenReturn(writer);
+        StringWriter stringWriter = new StringWriter();
+        when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
-        servlet.doPost(request, response);
-        verify(response).setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
-        verify(writer).write("Phrase should not be empty");
+        phraseController.doPost(request, response);
+
+        assertEquals("Phrase should not be empty", stringWriter.toString().trim());
     }
 }
