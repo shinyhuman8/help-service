@@ -6,6 +6,7 @@ import org.example.controllers.PhraseController;
 import org.example.dispatcher.DispatcherServlet;
 import org.example.models.Phrase;
 import org.example.repositories.MotivationRepositoryImpl;
+import org.example.services.impl.PhraseServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -34,12 +35,21 @@ public class HelpServiceServletTest {
     @Mock
     MotivationRepositoryImpl motivationRepositoryImpl;
 
+    @Mock
+    PhraseServiceImpl phraseService;
+
+    @Mock
+    ObjectMapper objectMapper;
+
     @BeforeEach
     void initHelpServiceServlet() {
         dispatcherServlet = Mockito.mock(DispatcherServlet.class);
         phraseController = new PhraseController();
         motivationRepositoryImpl = Mockito.mock(MotivationRepositoryImpl.class);
-        phraseController.setMotivationRepository(motivationRepositoryImpl);
+        phraseService = new PhraseServiceImpl();
+        phraseController.setPhraseService(phraseService);
+        objectMapper=new ObjectMapper();
+        phraseController.setObjectMapper(objectMapper);
         request = Mockito.mock(HttpServletRequest.class);
         response = Mockito.mock(HttpServletResponse.class);
     }
@@ -53,12 +63,13 @@ public class HelpServiceServletTest {
         Phrase expectedPhrase = new Phrase(UUID.randomUUID(), "test_show");
 
         when(motivationRepositoryImpl.show()).thenReturn(expectedPhrase);
+        phraseService.savePhrase(expectedPhrase);
 
         phraseController.doGet(request, response);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        PhraseDTO phraseDTO = new PhraseDTO(motivationRepositoryImpl.show().getPhrase());
+        PhraseDTO phraseDTO = new PhraseDTO(phraseService.showAnyPhrase().getPhrase());
         String jsonString = objectMapper.writeValueAsString(phraseDTO);
 
         String expectedJson = "{\"phrase\":\"test_show\"}";

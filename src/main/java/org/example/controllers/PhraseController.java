@@ -10,26 +10,32 @@ import org.example.annotations.GetMapping;
 import org.example.annotations.PostMapping;
 import org.example.models.Phrase;
 import org.example.repositories.MotivationRepository;
+import org.example.services.PhraseService;
 
 import java.io.IOException;
 
 @Controller
 public class PhraseController {
     @Autowired
-    private MotivationRepository motivationRepository;
+    private PhraseService phraseService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    public void setMotivationRepository(MotivationRepository motivationRepository) {
-        this.motivationRepository = motivationRepository;
+    public void setPhraseService(PhraseService phraseService) {
+        this.phraseService = phraseService;
+    }
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/help-service/v1/support/get")
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
-        Phrase phrase = motivationRepository.show();
+
+        Phrase phrase = phraseService.showAnyPhrase();
         PhraseDTO phraseDTO = new PhraseDTO(phrase.getPhrase());
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String jsonString = objectMapper.writeValueAsString(phraseDTO);
 
         response.getWriter().write(jsonString);
@@ -37,25 +43,8 @@ public class PhraseController {
 
     @PostMapping("/help-service/v1/support/post")
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
         PhraseDTO receivedPhraseDTO = objectMapper.readValue(request.getReader(), PhraseDTO.class);
 
-        if (receivedPhraseDTO.getPhrase() == null || receivedPhraseDTO.getPhrase().isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
-            response.getWriter().write("Phrase should not be empty");
-        } else if (!request.getContentType().equals("text/plain")) {
-            response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-            response.getWriter().write("Phrase should be a text");
-        } else {
-            motivationRepository.save(convertToPhrase(receivedPhraseDTO));
-            response.setStatus(HttpServletResponse.SC_CREATED);
-            response.getWriter().write("Phrase successfully saved");
-        }
-    }
-
-    private Phrase convertToPhrase(PhraseDTO phraseDTO) {
-        Phrase phrase = new Phrase();
-        phrase.setPhrase(phraseDTO.getPhrase());
-        return phrase;
+        phraseService.doResponse(receivedPhraseDTO, response);
     }
 }

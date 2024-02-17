@@ -25,11 +25,14 @@ public class ApplicationContext {
         this.BEAN_BY_CLASS = new HashMap<>();
         this.reflection = new Reflections(packageToScan);
         init();
-
     }
 
     public ApplicationContext() {
         this("org.example");
+    }
+
+    public Reflections getReflection() {
+        return reflection;
     }
 
     private void init() {
@@ -37,7 +40,6 @@ public class ApplicationContext {
                 .map(this::createBeanByClass)
                 .forEach(configInstance -> getMethodsWithoutObjectsMethods(configInstance)
                         .forEach(method -> initBeanByBeanMethod(method, configInstance)));
-
     }
 
     public <T> T getBean(Class<T> clazz) {
@@ -66,32 +68,6 @@ public class ApplicationContext {
             throw new RuntimeException(e);
         }
     }
-
-    public Method findHandler(String path, Class<? extends Annotation> annotationType) {
-        return findHandlerImpl(path, annotationType);
-    }
-
-    public Method findHandlerImpl(String path, Class<? extends Annotation> annotationType) {
-        Set<Class<?>> controllers = reflection.getTypesAnnotatedWith(Controller.class);
-        for (Class<?> controller : controllers) {
-            for (Method method : controller.getMethods()) {
-                if (method.isAnnotationPresent(annotationType)) {
-                    String methodPath = null;
-                    try {
-                        Method valueMethod = annotationType.getMethod("value");
-                        methodPath = (String) valueMethod.invoke(method.getAnnotation(annotationType));
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-                    if (path.equals(methodPath)) {
-                        return method;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
 
     public void injectFieldBean(Object controller) {
         for (Field field : controller.getClass().getDeclaredFields()) {

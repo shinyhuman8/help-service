@@ -2,25 +2,26 @@ package org.example.dispatcher.impl;
 
 import org.example.annotations.PostMapping;
 import org.example.context.ApplicationContext;
+import org.example.dispatcher.FinderHandlerRequest;
 import org.example.dispatcher.HttpBody;
 import org.example.dispatcher.RequestGenerator;
+import org.example.dispatcher.utils.ExecutorRequest;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class PostRequestGenerator implements RequestGenerator {
+public class PostRequestGenerator implements RequestGenerator, FinderHandlerRequest {
     @Override
     public void handle(List<HttpBody> httpBodies, ApplicationContext applicationContext) {
         for (HttpBody httpBody : httpBodies) {
             String path = httpBody.getRequest().getRequestURI();
-            Method handlerMethod = applicationContext.findHandler(path, PostMapping.class);
-
-            executeRequest(httpBody, handlerMethod);
+            ExecutorRequest.executeRequest(httpBody, findHandler(path, this.getType(), applicationContext));
         }
     }
 
     @Override
-    public Class<?> getType() {
+    public Class<? extends Annotation> getType() {
         return PostMapping.class;
     }
 }
