@@ -1,7 +1,5 @@
 package org.example.DTO;
 
-import java.util.UUID;
-
 public class PhraseDTO {
     private String phrase;
 

@@ -1,50 +1,32 @@
 package org.example.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.example.DTO.PhraseDTO;
-import org.example.annotations.Autowired;
-import org.example.annotations.Controller;
-import org.example.annotations.GetMapping;
-import org.example.annotations.PostMapping;
 import org.example.models.Phrase;
-import org.example.repositories.MotivationRepository;
-import org.example.services.PhraseService;
+import org.example.services.PhraseServiceImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-@Controller
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/help-service/v1/support")
 public class PhraseController {
-    @Autowired
-    private PhraseService phraseService;
-    @Autowired
-    private ObjectMapper objectMapper;
 
-    public void setPhraseService(PhraseService phraseService) {
-        this.phraseService = phraseService;
-    }
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    private final PhraseServiceImpl phraseService;
 
-    @GetMapping("/help-service/v1/support/get")
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain");
-        response.setCharacterEncoding("UTF-8");
-
+    @GetMapping("/get")
+    public ResponseEntity<PhraseDTO> getPhrase() {
         Phrase phrase = phraseService.showAnyPhrase();
         PhraseDTO phraseDTO = new PhraseDTO(phrase.getPhrase());
-
-        String jsonString = objectMapper.writeValueAsString(phraseDTO);
-
-        response.getWriter().write(jsonString);
+        return ResponseEntity.ok(phraseDTO);
     }
 
-    @PostMapping("/help-service/v1/support/post")
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        PhraseDTO receivedPhraseDTO = objectMapper.readValue(request.getReader(), PhraseDTO.class);
-
-        phraseService.doResponse(receivedPhraseDTO, response);
+    @PostMapping("/post")
+    public ResponseEntity savePhrase(@RequestBody PhraseDTO phraseDTO) throws IOException {
+        phraseService.doResponse(phraseDTO);
+        return new ResponseEntity(phraseDTO.getPhrase(),HttpStatus.CREATED);
     }
 }
