@@ -2,8 +2,8 @@ package org.example;
 
 import java.util.List;
 
-public interface MessageBroker {
-    void sendMessage(String message);
+public interface MessageBroker<T> {
+    void sendMessage(T message);
 
-    List<String> consumeMessages();
+    List<Object> consumeMessages();
 }

@@ -7,16 +7,16 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 @Service
-public class CustomMessageBroker implements MessageBroker {
-    private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+public class CustomMessageBroker<T> implements MessageBroker<T> {
+    private final BlockingQueue<T> queue = new LinkedBlockingQueue<>();
 
     @Override
-    public void sendMessage(String message) {
+    public void sendMessage(T message) {
         queue.offer(message);
     }
     @Override
-    public List<String> consumeMessages(){
-        List<String> consumerMessages= new ArrayList<>();
+    public List<Object> consumeMessages(){
+        List<Object> consumerMessages= new ArrayList<>();
         for (int i = 0; i < queue.size(); i++) {
             consumerMessages.add(queue.poll());
         }

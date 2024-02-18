@@ -2,19 +2,16 @@ package org.example;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class SubscriberBeanPostProcessor implements BeanPostProcessor {
     private final CustomMessageBroker customMessageBroker;
-    private final Map<Object, Method> registerSubscriber = new HashMap<>();
+    private final Map<Object, Method> registerSubscriber = new ConcurrentHashMap<>();
 
     public SubscriberBeanPostProcessor(CustomMessageBroker customMessageBroker) {
         this.customMessageBroker = customMessageBroker;
@@ -41,7 +38,7 @@ public class SubscriberBeanPostProcessor implements BeanPostProcessor {
             while (true) {
                 try {
                     pollMessages();
-                    Thread.sleep(20000); // 500 миллисекунд задержка
+                    Thread.sleep(30000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Thread interrupted", e);
@@ -52,15 +49,15 @@ public class SubscriberBeanPostProcessor implements BeanPostProcessor {
 
     public void pollMessages() {
         registerSubscriber.forEach((topicName, listeners) -> {
-            List<String> messages = customMessageBroker.consumeMessages();
+            List<Object> messages = customMessageBroker.consumeMessages();
             if (!messages.isEmpty()) {
-                registerSubscriber.forEach((bean, method) -> invokeListenerMethod(bean, method, messages));
+                registerSubscriber.forEach((bean, method) -> invokeSubscriberMethod(bean, method, messages));
             }
         });
     }
 
-    private void invokeListenerMethod(Object bean, Method method, List<String> messages) {
-        for (String message : messages) {
+    private void invokeSubscriberMethod(Object bean, Method method, List<Object> messages) {
+        for (Object message : messages) {
             try {
                 method.setAccessible(true);
                 method.invoke(bean, message);
