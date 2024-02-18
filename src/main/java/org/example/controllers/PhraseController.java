@@ -2,6 +2,7 @@ package org.example.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.example.DTO.PhraseDTO;
+import org.example.MessageBroker;
 import org.example.models.Phrase;
 import org.example.services.PhraseServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.io.IOException;
 public class PhraseController {
 
     private final PhraseServiceImpl phraseService;
+    private final MessageBroker messageBroker;
 
     @GetMapping("/get")
     public ResponseEntity<PhraseDTO> getPhrase() {
@@ -26,7 +28,8 @@ public class PhraseController {
 
     @PostMapping("/post")
     public ResponseEntity savePhrase(@RequestBody PhraseDTO phraseDTO) throws IOException {
-        phraseService.doResponse(phraseDTO);
+        //phraseService.doResponse(phraseDTO);
+        messageBroker.sendMessage(phraseDTO.getPhrase());
         return new ResponseEntity(phraseDTO.getPhrase(),HttpStatus.CREATED);
     }
 }

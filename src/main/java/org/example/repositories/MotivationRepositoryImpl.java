@@ -10,7 +10,6 @@ public class MotivationRepositoryImpl{
     private static final Map<UUID, Phrase> PHRASE_REPOSITORY = new ConcurrentHashMap<>();
 
     public void save(Phrase phrase) {
-        enrichPhrase(phrase);
         PHRASE_REPOSITORY.put(UUID.randomUUID(), phrase);
     }
 
@@ -22,7 +21,5 @@ public class MotivationRepositoryImpl{
         return PHRASE_REPOSITORY.values().stream().skip(randomIndex).findFirst().orElse(null);
     }
 
-    private void enrichPhrase(Phrase phrase) {
-        phrase.setId(UUID.randomUUID());
-    }
+
 }
