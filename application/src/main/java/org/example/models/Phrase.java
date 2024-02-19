@@ -14,6 +14,10 @@ public class Phrase {
         this.phrase = phrase;
     }
 
+    public Phrase(String phrase) {
+        this.phrase=phrase;
+    }
+
     public UUID getId() {
         return id;
     }

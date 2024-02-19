@@ -15,11 +15,7 @@ public class CustomMessageBroker<T> implements MessageBroker<T> {
         queue.offer(message);
     }
     @Override
-    public List<Object> consumeMessages(){
-        List<Object> consumerMessages= new ArrayList<>();
-        for (int i = 0; i < queue.size(); i++) {
-            consumerMessages.add(queue.poll());
-        }
-        return consumerMessages;
+    public T consumeMessages(){
+        return queue.poll();
     }
 }

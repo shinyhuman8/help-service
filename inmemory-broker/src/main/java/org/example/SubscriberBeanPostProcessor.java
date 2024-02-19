@@ -9,11 +9,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class SubscriberBeanPostProcessor implements BeanPostProcessor {
-    private final CustomMessageBroker customMessageBroker;
+public class SubscriberBeanPostProcessor<T> implements BeanPostProcessor {
+    private final MessageBroker customMessageBroker;
     private final Map<Object, Method> registerSubscriber = new ConcurrentHashMap<>();
 
-    public SubscriberBeanPostProcessor(CustomMessageBroker customMessageBroker) {
+    public SubscriberBeanPostProcessor(MessageBroker customMessageBroker) {
         this.customMessageBroker = customMessageBroker;
     }
 
@@ -38,7 +38,7 @@ public class SubscriberBeanPostProcessor implements BeanPostProcessor {
             while (true) {
                 try {
                     pollMessages();
-                    Thread.sleep(30000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Thread interrupted", e);
@@ -49,21 +49,19 @@ public class SubscriberBeanPostProcessor implements BeanPostProcessor {
 
     public void pollMessages() {
         registerSubscriber.forEach((topicName, listeners) -> {
-            List<Object> messages = customMessageBroker.consumeMessages();
-            if (!messages.isEmpty()) {
-                registerSubscriber.forEach((bean, method) -> invokeSubscriberMethod(bean, method, messages));
+            T message = (T) customMessageBroker.consumeMessages();
+            if (!(message == null)) {
+                registerSubscriber.forEach((bean, method) -> invokeSubscriberMethod(bean, method, message));
             }
         });
     }
 
-    private void invokeSubscriberMethod(Object bean, Method method, List<Object> messages) {
-        for (Object message : messages) {
+    private void invokeSubscriberMethod(Object bean, Method method, T message) {
             try {
                 method.setAccessible(true);
                 method.invoke(bean, message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
     }
 }
