@@ -4,18 +4,17 @@
   <groupId>org.example</groupId>
   <artifactId>help-service</artifactId>
   <packaging>pom</packaging>
-  <modules>
-    <module>inmemory-broker</module>
-    <module>application</module>
-  </modules>
-  <version>1.0</version>
+    <modules>
+        <module>help-service-kafka</module>
+    </modules>
+    <version>1.0</version>
   <name>help-service</name>
   <url>http://maven.apache.org</url>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.2</version>
+    <version>2.7.13</version>
     <relativePath/>
   </parent>
 
@@ -26,8 +25,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit.jupiter.version>5.9.1</junit.jupiter.version>
     <mockito.version>5.3.0</mockito.version>
-    <reflections.version>0.10.2</reflections.version>
-    <spring.version>6.1.2</spring.version>
   </properties>
   <dependencies>
     <dependency>
@@ -63,9 +60,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>0.10.2</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -73,13 +69,8 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
     </dependency>
   </dependencies>
   <build>

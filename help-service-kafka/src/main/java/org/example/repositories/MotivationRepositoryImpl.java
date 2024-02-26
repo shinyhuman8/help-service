@@ -1,17 +1,17 @@
 package org.example.repositories;
 
-import org.example.Subscriber;
 import org.example.models.Phrase;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
 @Repository
 public class MotivationRepositoryImpl implements MotivationRepository {
     private static final Map<UUID, Phrase> PHRASE_REPOSITORY = new ConcurrentHashMap<>();
 
     @Override
-    @Subscriber
     public void save(Phrase phrase) {
         PHRASE_REPOSITORY.put(UUID.randomUUID(), phrase);
     }
