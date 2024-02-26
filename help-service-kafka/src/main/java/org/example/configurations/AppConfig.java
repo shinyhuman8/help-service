@@ -1,11 +1,10 @@
-package org.example;
+package org.example.configurations;
 
 import org.example.repositories.MotivationRepository;
 
-import org.example.services.BrokerPhraseServiceImpl;
 import org.example.services.PhraseService;
-import org.example.services.PhraseServiceImpl;
 import org.example.services.Producer;
+import org.example.services.impl.PhraseServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +16,7 @@ import org.springframework.context.annotation.Primary;
 public class AppConfig {
     @Bean
     @Primary
-    public PhraseService phraseService(MotivationRepository motivationRepository, Producer producer) {
-        return new PhraseServiceImpl(motivationRepository, producer);
+    public PhraseService phraseService(MotivationRepository motivationRepository) {
+        return new PhraseServiceImpl(motivationRepository);
     }
-
-
-
 }

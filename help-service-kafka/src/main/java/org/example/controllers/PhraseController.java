@@ -1,11 +1,7 @@
 package org.example.controllers;
 
 import org.example.DTO.PhraseDTO;
-import org.example.models.Phrase;
 import org.example.services.PhraseService;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,13 +16,11 @@ public class PhraseController {
 
     @GetMapping("/get")
     public PhraseDTO getPhrase() {
-        Phrase phrase = phraseService.showAnyPhrase();
-        PhraseDTO phraseDTO = new PhraseDTO(phrase.getPhrase());
-        return phraseDTO;
+        return new PhraseDTO(phraseService.showAnyPhrase().getPhrase());
     }
 
     @PostMapping("/post")
-    public void savePhrase(@RequestBody PhraseDTO phraseDTO) {
-        phraseService.savePhrase(phraseDTO);
+    public String savePhrase(@RequestBody PhraseDTO phraseDTO) {
+        return phraseService.savePhrase(phraseDTO);
     }
 }

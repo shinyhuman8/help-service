@@ -1,6 +1,8 @@
-package org.example.repositories;
+package org.example.repositories.impl;
 
+import org.example.DTO.PhraseDTO;
 import org.example.models.Phrase;
+import org.example.repositories.MotivationRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +25,11 @@ public class MotivationRepositoryImpl implements MotivationRepository {
         }
         int randomIndex = new Random().nextInt(PHRASE_REPOSITORY.size());
         return PHRASE_REPOSITORY.values().stream().skip(randomIndex).findFirst().orElse(null);
+    }
+
+    @Override
+    public boolean checkUniquePhrase(PhraseDTO phrase) {
+        return PHRASE_REPOSITORY.values().stream().anyMatch(p -> phrase.getPhrase().equals(p.getPhrase()));
     }
 
 
