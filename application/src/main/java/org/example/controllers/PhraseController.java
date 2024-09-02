@@ -15,6 +15,7 @@ public class PhraseController {
 
     private final PhraseService phraseService;
 
+
     @GetMapping("/get")
     public ResponseEntity<PhraseDTO> getPhrase() {
         Phrase phrase = phraseService.showAnyPhrase();
